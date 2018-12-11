@@ -3,6 +3,20 @@ import re
 import random
 import pdb
 
+def sample_and_write_output(standardline, localline, p, off):
+    '''
+    Choose standard dialect tag with probability p.  Then, separate choice of form to use with probability p.  I.e., two separate Bernoulli trials for sample dialect tag and form to use.  Then, write the line to file.
+    '''
+    if flip(p): #flip for dialect tag
+        tag = "Sto"
+    else:
+        tag = "Cha"
+    if flip(p): #flip for form used
+        line = standardline
+    else:
+        line = localline
+    off.write(set_dia(line, tag))
+
 def flip(p):
     return True if random.random() < p else False 
 
@@ -31,13 +45,6 @@ def main():
     localf.close()
     assert len(locallines) == len(standardlines)
 
-    #do:
-    #100   standard
-    #75/25 standard/local
-    #50/50 standard/local
-    #25/75 standard/local
-    #100   local
-
     #open 6 output files by data split
     off100s = open(sys.argv[1]+".100s", 'w')
     off75s = open(sys.argv[1]+".75s", 'w')
@@ -57,21 +64,10 @@ def main():
         else:
             off100s.write(set_dia(standardline,"Sto")) #choose standard 100% of time
 
-            if flip(0.75):
-                off75s.write(set_dia(standardline,"Sto")) #choose standard 75% of time
-            else:
-                off75s.write(set_dia(localline,"Cha")) #choose local 25% of time 
+            sample_and_write_output(standardline, localline, 0.75, off75s)
+            sample_and_write_output(standardline, localline, 0.5, off50s)
+            sample_and_write_output(standardline, localline, 0.25, off25s)
 
-            if flip(0.5):
-                off50s.write(set_dia(standardline,"Sto")) #choose standard 50% of time
-            else:
-                off50s.write(set_dia(localline,"Cha")) #choose local 50% of time 
-
-            if flip(0.25):
-                off25s.write(set_dia(standardline,"Sto")) #choose standard 25% of tiem
-            else:
-                off25s.write(set_dia(localline,"Cha")) #choose local 75% of time 
-                
             off0s.write(set_dia(localline,"Cha")) #choose local 100% of time
 
     off100s.close()
@@ -82,4 +78,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
