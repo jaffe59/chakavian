@@ -17,16 +17,32 @@ def set_dia(line,tag):
     fields[5] = features
     return " ".join(fields)
 
+def get_training_vocab(training_file):
+    lemmas = Set()
+    full_form_targets = Set()
+    for line in training_file:
+        if (not line.startswith("#")) and line != '\n':
+            _, full_form, lemma, pos, _, features, _, _, _, _ = line.split()
+            lemmas.add(lemma)
+            full_form_targets.add(full_form)
+    return lemmas, full_form_targets
+
+
 def main():
     iff = open(sys.argv[1], 'r')
     tag = sys.argv[2]
+    training_file = sys.argv[3]
     offdia = open(sys.argv[1]+"."+tag, 'w')
+
+    lemma_filter_set, full_form_filter_set = get_training_vocab(training_file)
 
     for line in iff:
         if line.startswith("#") or line == "\n": #write non-data lines in all files without sampling
             offdia.write(line)
         else:
-            offdia.write(set_dia(line,tag)+"\n")
+            _, full_form, lemma, pos, _, features, _, _, _, _ = line.split()
+            if lemma not in lemma_filter_set: #filter dev items to only include lemmas not seen in training. strongest filter.  could ease back to full form if this reduces the dev set too much.  high-frequency items will be filtered, which may impact dev representativeness, but makes the test harder and more ecologically viable
+                offdia.write(set_dia(line,tag)+"\n")
 
     offdia.close()
 
