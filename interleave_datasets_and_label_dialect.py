@@ -5,13 +5,33 @@ import pdb
 from collections import Counter
 
 def sample_and_write_output(standardline, localline, p, off, stats_tracker):
-    '''
-    Choose standard dialect tag with probability p.  
-    Then, separate choice of form to use with probability p.  
-    I.e., two separate Bernoulli trials for sample dialect tag and form to use.  
-    Then, write the line to file. 
-    Also, for reinflected forms, counts how often there's mismatch
-    '''
+    #Choose standard dialect tag with probability p.  
+    #Also, for reinflected forms, counts how often there's mismatch
+    if flip(p): #flip for dialect tag
+        tag = "Sto"
+        off.write(set_dia(standardline,tag))
+    else:
+        tag = "Cha"
+        off.write(set_dia(localline,tag))
+
+    #descriptive stats for reinflected lines
+    if standardline != localline: 
+        if tag == "Sto" and line == standardline:
+            stats_tracker['stotag_stoform'] += 1
+        if tag == "Sto" and line == localline:
+            stats_tracker['stotag_chaform'] += 1
+        if tag == "Cha" and line == standardline:
+            stats_tracker['chatag_stoform'] += 1
+        if tag == "Cha" and line == localline:
+            stats_tracker['chatag_chaform'] += 1
+
+'''
+def sample_and_write_output_v1(standardline, localline, p, off, stats_tracker):
+    #Choose standard dialect tag with probability p.  
+    #Then, separate choice of form to use with probability p.  
+    #I.e., two separate Bernoulli trials for sample dialect tag and form to use.  
+    #Then, write the line to file. 
+    #Also, for reinflected forms, counts how often there's mismatch
     if flip(p): #flip for dialect tag
         tag = "Sto"
     else:
@@ -31,6 +51,7 @@ def sample_and_write_output(standardline, localline, p, off, stats_tracker):
             stats_tracker['chatag_stoform'] += 1
         if tag == "Cha" and line == localline:
             stats_tracker['chatag_chaform'] += 1
+'''
 
 def flip(p):
     return True if random.random() < p else False 
